@@ -1,5 +1,6 @@
 var express = require("express");
 var exphbs = require("express-handlebars");
+var methodOverride = require("method-override");
 var bodyparser = require("body-parser");
 var mongoose = require("mongoose");
 var app = express();
@@ -16,7 +17,10 @@ mongoose.connect("mongodb://localhost:27017/gamelibrary",{
 
 //load game model
 require("./models/Game");
-var game = mongoose.model("games");
+var Game = mongoose.model("games");
+
+//require mehod override
+app.use(methodOverride("_method"));
 
 app.engine('handlebars', exphbs({defaultLayout:"main"}));
 app.set('view engine', 'handlebars');
@@ -31,6 +35,16 @@ app.get("/", function(req, res){
         title:title
     });
 });
+app.get("/games", function(req, res){
+    Game.find({}).then(function(games){
+        console.log(games);
+        res.render("gameentry/index", {
+            games:games
+        });
+    });
+    
+});
+
 //post request
 app.post("/gameentry", function(req, res){
     console.log(req.body);
@@ -53,7 +67,16 @@ app.post("/gameentry", function(req, res){
             description:req.body.description
         });
     }else{
-        res.send(req.body)
+        //res.send(req.body);
+        var newUser = {
+            title:req.body.title,
+            price:req.body.price,
+            description:req.body.description
+        }
+        Game(newUser).save().then(function(games){
+            console.log(games);
+            res.redirect("/games");
+        });
     }
     //
 });
@@ -62,6 +85,28 @@ app.get("/about", function(req, res){
 });
 app.get("/gameentry/gameentryadd", function(req, res){
     res.render("gameentry/gameentryadd");
+});
+app.put("/gameedit/:id", function(req, res){
+    Game.findOne({
+        _id:req.params.id
+    }).then(function(game){
+        game.title = req.body.title;
+        game.price = req.body.price;
+        game.description = req.body.description;
+
+        game.save().then(function(game){
+            res.redirect("/games");
+        })
+    })
+})
+app.get("/gameentry/gameentryedit/:id", function(req, res){
+    Game.findOne({
+        _id:req.params.id
+    }).then(function(games){
+        res.render("gameentry/gameentryedit",{
+            games:games
+        });
+    });    
 });
 app.listen(5000, function(){
     console.log("Game Library running on port 5000");
