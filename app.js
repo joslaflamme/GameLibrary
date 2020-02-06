@@ -2,8 +2,14 @@ var express = require("express");
 var exphbs = require("express-handlebars");
 var methodOverride = require("method-override");
 var bodyparser = require("body-parser");
+var session = require("express-session");
+var flash = require("connect-flash");
 var mongoose = require("mongoose");
 var app = express();
+
+//load routes
+var games = require("./routes/games");
+var users = require("./routes/users");
 
 //connect to mongoose
 mongoose.connect("mongodb://localhost:27017/gamelibrary",{
@@ -15,9 +21,7 @@ mongoose.connect("mongodb://localhost:27017/gamelibrary",{
     console.log(err);
 });
 
-//load game model
-require("./models/Game");
-var Game = mongoose.model("games");
+
 
 //require mehod override
 app.use(methodOverride("_method"));
@@ -28,6 +32,22 @@ app.set('view engine', 'handlebars');
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended:false}));
 
+//express session
+app.use(session({
+    secret:"secret",
+    resave:true,
+    saveUninitialized:true
+}));
+
+//flash stuff
+app.use(flash());
+app.use(function(req, res, next){
+    res.locals.success_msg = req.flash("success_msg");
+    res.locals.error_msg = req.flash("error_msg");
+    res.locals.error = req.flash("error");
+    next();
+})
+
 //get route using express handlebars
 app.get("/", function(req, res){
     var title = "T. Hanks"
@@ -35,86 +55,20 @@ app.get("/", function(req, res){
         title:title
     });
 });
-app.get("/games", function(req, res){
-    Game.find({}).then(function(games){
-        console.log(games);
-        res.render("gameentry/index", {
-            games:games
-        });
-    });
-    
-});
-
-//post request
-app.post("/gameentry", function(req, res){
-    console.log(req.body);
-    var errors = [];
-
-    if(!req.body.title){
-        errors.push({text:"please add a title, fool"})
-    }
-    if(!req.body.price){
-        errors.push({text:"please add a price, fool"})
-    }
-    if(!req.body.description){
-        errors.push({text:"please add a description, fool"})
-    }
-    if(errors.length > 0){
-        res.render("gameentry/gameentryadd",{
-            errors:errors,
-            title:req.body.title,
-            price:req.body.price,
-            description:req.body.description
-        });
-    }else{
-        //res.send(req.body);
-        var newUser = {
-            title:req.body.title,
-            price:req.body.price,
-            description:req.body.description
-        }
-        Game(newUser).save().then(function(games){
-            console.log(games);
-            res.redirect("/games");
-        });
-    }
-    //
-});
 app.get("/about", function(req, res){
     res.render("about");
 });
-app.get("/gameentry/gameentryadd", function(req, res){
-    res.render("gameentry/gameentryadd");
-});
-app.put("/gameedit/:id", function(req, res){
-    Game.findOne({
-        _id:req.params.id
-    }).then(function(game){
-        game.title = req.body.title;
-        game.price = req.body.price;
-        game.description = req.body.description;
 
-        game.save().then(function(game){
-            res.redirect("/games");
-        })
-    })
-})
-app.delete("/gamesdelete/:id", function(req, res){
-    Game.remove({
-        _id:req.params.id
-    }).then(function(){
-        res.redirect("/games")
-    });
-});
-app.get("/gameentry/gameentryedit/:id", function(req, res){
-    Game.findOne({
-        _id:req.params.id
-    }).then(function(games){
-        res.render("gameentry/gameentryedit",{
-            games:games
-        });
-    });    
-});
+//use routes
+
+
+
+
+//useroutes
+app.use("/game", games);
+app.use("/users", users);
+
+//connects for sign in
 app.listen(5000, function(){
     console.log("Game Library running on port 5000");
 });
