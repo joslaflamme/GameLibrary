@@ -99,6 +99,13 @@ app.put("/gameedit/:id", function(req, res){
         })
     })
 })
+app.delete("/gamesdelete/:id", function(req, res){
+    Game.remove({
+        _id:req.params.id
+    }).then(function(){
+        res.redirect("/games")
+    });
+});
 app.get("/gameentry/gameentryedit/:id", function(req, res){
     Game.findOne({
         _id:req.params.id
