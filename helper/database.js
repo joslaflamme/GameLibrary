@@ -1,7 +1,7 @@
 if(process.env.NODE_ENV == "production"){
     //connection to cloud mongodb server
     module.exports = {
-        mongoURI:"mongodb+srv://joslaf:Lak7357**@cluster0-aqlcg.mongodb.net/test?retryWrites=true&w=majority"
+        mongoURI:"mongodb://joslaf:Lak7357**@cluster0-aqlcg.mongodb.net/test?retryWrites=true&w=majority"
     }
 }
 else{
