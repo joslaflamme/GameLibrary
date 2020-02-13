@@ -5,12 +5,15 @@ var bodyparser = require("body-parser");
 var session = require("express-session");
 var flash = require("connect-flash");
 var mongoose = require("mongoose");
+var passport = require("passport");
 var app = express();
 
 //load routes
 var games = require("./routes/games");
 var users = require("./routes/users");
 
+//load passport
+require("./config/passport")(passport);
 //connect to mongoose
 mongoose.connect("mongodb://localhost:27017/gamelibrary",{
     useNewUrlParser:true,
@@ -39,12 +42,16 @@ app.use(session({
     saveUninitialized:true
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 //flash stuff
 app.use(flash());
 app.use(function(req, res, next){
     res.locals.success_msg = req.flash("success_msg");
     res.locals.error_msg = req.flash("error_msg");
     res.locals.error = req.flash("error");
+    res.locals.user = req.user || null;
     next();
 })
 
