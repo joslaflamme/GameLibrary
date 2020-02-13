@@ -7,15 +7,16 @@ var flash = require("connect-flash");
 var mongoose = require("mongoose");
 var passport = require("passport");
 var app = express();
+var db = require("./helper/database");
 
 //load routes
 var games = require("./routes/games");
 var users = require("./routes/users");
-
+var port = process.env.PORT || 5000;
 //load passport
 require("./config/passport")(passport);
 //connect to mongoose
-mongoose.connect("mongodb://localhost:27017/gamelibrary",{
+mongoose.connect(db.mongoURI,{
     useNewUrlParser:true,
     useUnifiedTopology: true
 }).then(function(){
@@ -76,6 +77,6 @@ app.use("/game", games);
 app.use("/users", users);
 
 //connects for sign in
-app.listen(5000, function(){
+app.listen(port, function(){
     console.log("Game Library running on port 5000");
 });

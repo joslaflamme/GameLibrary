@@ -64,7 +64,7 @@ router.post("/register", function(req, res){
 });
 router.get("/logout", function(req, res){
     req.logout();
-    req.flash("success_msg", "Baby come back... You can lay it all on me...");
+    req.flash("success_msg", "Baby come back... You can blame it all on me... THANKS KYLE");
     res.redirect("/users/login");
 })
 
