@@ -16,7 +16,7 @@ var port = process.env.PORT || 5000;
 //load passport
 require("./config/passport")(passport);
 //connect to mongoose
-mongoose.connect(db.mongoURI,{
+mongoose.connect("mongodb+srv://joslaf:joe@cluster0-aqlcg.mongodb.net/test?retryWrites=true&w=majority",{
     useNewUrlParser:true,
     useUnifiedTopology: true
 }).then(function(){
